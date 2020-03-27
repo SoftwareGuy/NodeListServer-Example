@@ -1,5 +1,4 @@
 ﻿// This file is part of the NodeListServer Example package.
-
 using Mirror;
 using System;
 using System.Collections;
