@@ -15,10 +15,9 @@ namespace NodeListServer
         [Header("Controls")]
         [Tooltip("If set to yes, this script will be set to not be destroyed on loading a new scene.")]
         [SerializeField] private bool DontKillMe = false;
-        [Tooltip("When the script starts, should we register this server automatically? Otherwise you'll have to call RegisterServer() via script.")]
-        [SerializeField] private bool RegisterServerOnStart = false;
+
         [Tooltip("If a registration attempt fails (ie. bad network conditions), should it get a retry as an update?")]
-        [SerializeField] private bool RetryAsUpdateOnFail = false;
+        [SerializeField] private bool RetryRegistrationAsUpdateOnFail = true;
 
         [Tooltip("Should we auto-update the List Server periodically?")]
         [SerializeField] private bool UpdateServerPeriodically = false;
@@ -44,6 +43,7 @@ namespace NodeListServer
         private string updateServerEndpoint = "/update";
         private string removeServerEndpoint = "/remove";
 
+        private bool hasRegistered = false;
         private bool isBusy = false;
 
         private void Awake()
@@ -51,14 +51,6 @@ namespace NodeListServer
             if (DontKillMe)
             {
                 DontDestroyOnLoad(this);
-            }
-        }
-
-        private void Start()
-        {
-            if (RegisterServerOnStart)
-            {
-                Invoke(nameof(RegisterServer), 0.1f);
             }
         }
 
@@ -99,21 +91,27 @@ namespace NodeListServer
 
                 if (www.responseCode == 200)
                 {
-                    print("Successfully registered server!");
+                    print("Successfully registered server with NodeListServer instance!");
+                    hasRegistered = true;
                 }
                 else
                 {
-                    Debug.LogError("An error occurred while registering the server. One or more required fields, like the server UUID, name and port might be missing. You will need to fix this and call RegisterServer again to retry.");
+                    Debug.LogError("Mission failed. We'll get them next time.\n" +
+                        "An error occurred while registering the server. One or more required fields, like the server UUID, " +
+                        "name and port might be missing. You will need to fix this and call RegisterServer again to retry.");
                     Debug.LogError(www.error);
                     hasFailed = true;
                 }
             }
 
             isBusy = false;
-            if (hasFailed && RetryAsUpdateOnFail)
+
+            // It may have failed registration because the server came back online
+            // (ie. bad connection). Try an update if desired.
+            if (hasFailed && RetryRegistrationAsUpdateOnFail)
             {
-                print("Retrying as an update as specified.");
-                yield return UpdateServerInternal();
+                print("But it's not over yet. Get ready for the next round: retrying as an update as specified.");
+                yield return UpdateServerInternal(true);
             }
 
             if (UpdateServerPeriodically)
@@ -161,8 +159,10 @@ namespace NodeListServer
                 }
                 else
                 {
-                    Debug.LogError("An error occurred while deregistering the server. Please check the Communication Key and the Server UUID. " +
-                        "Do note that there is a chance that this server instance did not update before the configured NodeListServer deadline, therefore the Server UUID is invalid.");
+                    Debug.LogError("Mission failed. We'll get them next time.\n" + 
+                        "An error occurred while deregistering the server. Please check the Communication Key and the Server UUID. " +
+                        "Do note that there is a chance that this server instance did not update before the configured NodeListServer " +
+                        "deadline, therefore the Server UUID is invalid.");
                 }
             }
 
@@ -181,11 +181,14 @@ namespace NodeListServer
                 return;
             }
 
-            StartCoroutine(nameof(UpdateServerInternal));
+            StartCoroutine(nameof(UpdateServerInternal), false);
         }
 
-        private IEnumerator UpdateServerInternal()
+
+        private IEnumerator UpdateServerInternal(bool overrideRegisteredCheck = false)
         {
+            if (!overrideRegisteredCheck && !hasRegistered) yield break;
+
             WWWForm updateServerRequest = new WWWForm();
             isBusy = true;
 
@@ -209,10 +212,13 @@ namespace NodeListServer
                 if (www.responseCode == 200)
                 {
                     print("Successfully updated server information!");
+                    if(overrideRegisteredCheck) hasRegistered = true;
                 }
                 else
                 {
-                    Debug.LogError("An error occurred while updating the server information. The communication key or the server UUID might be wrong, or some other information is bogus. Or it could be you are experiencing connection problems.");
+                    Debug.LogError("Mission failed. We'll get them next time.\n" +
+                        "An error occurred while updating the server information. The communication key or the server UUID might be wrong, or some" +
+                        " other information is bogus. Or it could be you are experiencing connection problems.");
                 }
             }
 

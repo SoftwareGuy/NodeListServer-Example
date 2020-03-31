@@ -23,16 +23,16 @@ namespace NodeListServer
         [SerializeField] private int refreshInterval = 10;
 
         [Header("Cosmetics")]
-        [SerializeField] private GameObject popup;
-        [SerializeField] private Text mainStatusText;
-        [SerializeField] private Text popupStatusText;
-        [SerializeField] private GameObject ListElementPrefab;
-        [SerializeField] private GameObject ListElementContainer;
+        public GameObject popup;
+        public Text mainStatusText;
+        public Text popupStatusText;
+        public GameObject ListElementPrefab;
+        public GameObject ListElementContainer;
 
 
         [Header("For Experts only")]
-        [SerializeField] private Button refreshButton;
-        [SerializeField] private Button bonusButton;    // <-- This one is a joke, tbh. You can get rid of it.
+        public Button refreshButton;
+        public Button bonusButton;    // <-- This one is a joke, tbh. You can get rid of it.
 
         // Stop editing from this point onwards //
         private bool isBusy = false;
@@ -205,6 +205,7 @@ namespace NodeListServer
                 entryController.joinButton.onClick.RemoveAllListeners();
                 entryController.joinButton.onClick.AddListener(() =>
                 {
+                    print("CLICKY");
                     NetworkManager.singleton.networkAddress = modifiedAddress;
                     NetworkManager.singleton.StartClient();
                 });

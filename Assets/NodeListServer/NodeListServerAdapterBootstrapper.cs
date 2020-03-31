@@ -4,9 +4,12 @@ using UnityEngine;
 using Mirror;
 
 namespace NodeListServer.AdvancedExample {
+    // TODO: Remove this class.    
     public class NodeListServerAdapterBootstrapper : NetworkBehaviour
     {
+/*        
         private NodeListServerAdapter nlsAdapter;
+
 
         private void Awake()
         {
@@ -22,8 +25,12 @@ namespace NodeListServer.AdvancedExample {
         {
             base.OnStartServer();
 
-            UpdateInfo();
             nlsAdapter.RegisterServer();
+        }
+
+        private void LateUpdate()
+        {
+            UpdateInfo();
         }
 
         private void OnDisable()
@@ -36,6 +43,7 @@ namespace NodeListServer.AdvancedExample {
             nlsAdapter.CurrentServerInfo.PlayerCount = NetworkServer.connections.Count;
             nlsAdapter.CurrentServerInfo.PlayerCapacity = NetworkManager.singleton.maxConnections;
         }
+*/
     }
 
 }
