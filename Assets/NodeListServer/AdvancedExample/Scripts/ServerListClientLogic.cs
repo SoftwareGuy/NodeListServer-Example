@@ -37,7 +37,6 @@ namespace NodeListServer
         // Stop editing from this point onwards //
         private bool isBusy = false;
 
-        private Uri masterServerUri;
         private WWWForm unityRequestForm;
         private List<NodeListServerListEntry> listServerListEntries = new List<NodeListServerListEntry>();
 
@@ -45,14 +44,6 @@ namespace NodeListServer
         {
             unityRequestForm = new WWWForm();
             unityRequestForm.AddField("serverKey", communicationKey);
-
-            // Attempt to create a URI...
-            if (!Uri.TryCreate(masterServerUrl, UriKind.Absolute, out masterServerUri))
-            {
-                Debug.LogError("Creating an URI failed; is the Master Server URL valid?");
-                enabled = false;
-                return;
-            }
 
             // Sanity Checks
             if (string.IsNullOrEmpty(communicationKey))
@@ -107,10 +98,11 @@ namespace NodeListServer
 
             print("Refreshing the server list...");
 
-            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(masterServerUri, unityRequestForm))
+            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(masterServerUrl, unityRequestForm))
             {
                 isBusy = true;
                 print("Working...");
+
                 // This will wait until the request is sent.
                 yield return www.SendWebRequest();
 
