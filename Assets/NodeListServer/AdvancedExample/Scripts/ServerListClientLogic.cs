@@ -97,6 +97,8 @@ namespace NodeListServer
             if (popupStatusText != null) popupStatusText.text = "Just wait a moment";
             print("Refreshing the server list...");
 
+            print(masterServerUrl);
+
             using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(masterServerUrl, unityRequestForm))
             {
                 isBusy = true;
