@@ -1756,7 +1756,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5f05ffea7975f84b895228778a995fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ServerAddress: http://furutaka.oiran.studio:8889
+  ServerAddress: http://127.0.0.1:8889
   CommunicationKey: NodeListServerDefaultKey
   DontKillMe: 0
   RetryRegistrationAsUpdateOnFail: 1
@@ -2662,7 +2662,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48b85de715ff2bd42b01785386816646, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  masterServerUrl: http://furutaka.oiran.studio:8889/list
+  masterServerUrl: http://127.0.0.1:8889/list
   communicationKey: NodeListServerDefaultKey
   refreshOnStart: 1
   refreshInterval: 20

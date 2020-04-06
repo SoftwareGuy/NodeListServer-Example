@@ -97,7 +97,9 @@ namespace NodeListServer
             if (popupStatusText != null) popupStatusText.text = "Just wait a moment";
             print("Refreshing the server list...");
 
-            print(masterServerUrl);
+            // DEBUG: Investigating some Unity jank, seems that Unity can get "stuck"
+            // on a value and treat it like it's precious
+            // print(masterServerUrl);
 
             using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(masterServerUrl, unityRequestForm))
             {
@@ -198,7 +200,8 @@ namespace NodeListServer
                 entryController.joinButton.onClick.RemoveAllListeners();
                 entryController.joinButton.onClick.AddListener(() =>
                 {
-                    print("CLICKY");
+                    // Debug: Prints CLICKY to see if the button actually was clicked or Unity UI was being dumb
+                    // print("CLICKY");
                     NetworkManager.singleton.networkAddress = modifiedAddress;
                     NetworkManager.singleton.StartClient();
                 });
