@@ -31,4 +31,13 @@ namespace NodeListServer
         public string extras;
     }
 
+    [Serializable]
+    public struct ServerInfo
+    {
+        public string Name;         // The name of the server.
+        public int Port;             // The port of the server.
+        public int PlayerCount;     // The count of players currently on the server.
+        public int PlayerCapacity;  // The count of players allowed on the server.
+        public string ExtraInformation; // Some extra information, probably best in JSON format for easy parsing.
+    }
 }
