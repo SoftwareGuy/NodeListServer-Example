@@ -1788,7 +1788,7 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs: []
-  ListserverConnectUrl: http://127.0.0.1:8889
+  ListserverConnectUrl: http://furutaka.oiran.studio:8889
   ListserverAuthKey: NodeListServerDefaultKey
   ServerGuid: ecb4d255-fbc8-4c4d-81a5-52e093bbf3ca
   ServerName: My Server
@@ -2649,7 +2649,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48b85de715ff2bd42b01785386816646, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  masterServerUrl: http://127.0.0.1:8889/list
+  masterServerUrl: http://furutaka.oiran.studio:8889/list
   communicationKey: NodeListServerDefaultKey
   refreshOnStart: 1
   refreshInterval: 20
@@ -2660,7 +2660,7 @@ MonoBehaviour:
     type: 3}
   ListElementContainer: {fileID: 583153858}
   refreshButton: {fileID: 1004751479}
-  supportButton: {fileID: 0}
+  supportButton: {fileID: 993261495}
 --- !u!4 &1731173845
 Transform:
   m_ObjectHideFlags: 0

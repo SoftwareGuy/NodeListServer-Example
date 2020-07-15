@@ -355,7 +355,7 @@ public class NodeListServerNetManager : NetworkManager
             {
                 Debug.LogError("NodeLS: Mission failed. We'll get them next time.\n" +
                     "An error occurred while registering the server. One or more required fields, like the server GUID, " +
-                    "name and port might be missing. You will need to fix this and call RegisterServer again to retry.");
+                    $"name and port might be missing. Check the values on {gameObject.name} and try again.");
                 Debug.LogError(www.error);
                 hasFailed = true;
             }
@@ -403,9 +403,9 @@ public class NodeListServerNetManager : NetworkManager
             else
             {
                 Debug.LogError("NodeLS: Mission failed. We'll get them next time.\n" +
-                    "An error occurred while deregistering the server. Please check the Communication Key and the Server GUID. " +
+                    $"An error occurred while deregistering the server. Check the values on {gameObject.name} and try again. " +
                     "Do note that there is a chance that this server instance did not update before the configured NodeListServer " +
-                    "deadline, therefore the Server GUID is invalid.");
+                    "update deadline, therefore the server list entry has expired.");
             }
         }
 
@@ -445,7 +445,8 @@ public class NodeListServerNetManager : NetworkManager
             {
                 Debug.LogError("NodeLS: Mission failed. We'll get them next time.\n" +
                     "An error occurred while updating the server information. The communication key or the server GUID might be wrong, or some" +
-                    " other information is bogus. Or it could be you are experiencing connection problems.");                
+                    " other information is bogus. Or it could be you are experiencing connection problems.");
+
                 if (RetryUpdateAsRegistrationOnFail)
                 {                    
                     print("NodeLS: But it's not over yet, get ready for the next round. Retrying update as registration.");
