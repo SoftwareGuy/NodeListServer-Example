@@ -2705,18 +2705,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48b85de715ff2bd42b01785386816646, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  masterServerUrl: http://furutaka.oiran.studio:8889/list
+  masterServerUrl: http://127.0.0.1:8889/list
   communicationKey: NodeListServerDefaultKey
   refreshOnStart: 1
-  refreshInterval: 20
-  popup: {fileID: 1926990970}
-  mainStatusText: {fileID: 712827152}
-  popupStatusText: {fileID: 1081204139}
-  ListElementPrefab: {fileID: 1259177336467004, guid: c6ca829569179c749a037f1b7d8631a0,
-    type: 3}
-  ListElementContainer: {fileID: 583153858}
-  refreshButton: {fileID: 1004751479}
-  supportButton: {fileID: 993261495}
+  refreshInterval: 10
+  popup: {fileID: 0}
+  mainStatusText: {fileID: 0}
+  popupStatusText: {fileID: 0}
+  ListElementPrefab: {fileID: 0}
+  ListElementContainer: {fileID: 0}
+  refreshButton: {fileID: 0}
+  supportButton: {fileID: 0}
 --- !u!4 &1731173845
 Transform:
   m_ObjectHideFlags: 0
