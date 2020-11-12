@@ -22,9 +22,7 @@ namespace NodeListServer
         private const string AuthKey = "NodeListServerDefaultKey";
 
         // Change this to your NodeLS Server instance URL.
-        private const string Server = "http://furutaka.oiran.studio:8889";
-        private const string AddEndpoint = "add";
-        private const string RemoveEndpoint = "remove";
+        private const string Server = "http://127.0.0.1:8889";
 
         // Don't modify, this is randomly generated.
         private string InstanceServerId = string.Empty;
@@ -74,7 +72,7 @@ namespace NodeListServer
             serverData.AddField("serverCapacity", CurrentServerInfo.PlayerCapacity);
             serverData.AddField("serverExtras", CurrentServerInfo.ExtraInformation);
 
-            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post($"{Server}/{AddEndpoint}", serverData))
+            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(Server + "/add", serverData))
             {
                 yield return www.SendWebRequest();
 
@@ -100,7 +98,7 @@ namespace NodeListServer
             serverData.AddField("serverKey", AuthKey);
             serverData.AddField("serverUuid", InstanceServerId);
 
-            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post($"{Server}/{RemoveEndpoint}", serverData))
+            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(Server + "/remove", serverData))
             {
                 yield return www.SendWebRequest();
 
