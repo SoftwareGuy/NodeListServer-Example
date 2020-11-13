@@ -150,7 +150,8 @@ namespace NodeListServer
             if (NodeListServerCommunicationManager.Instance != null)
             {
                 NodeListServerCommunicationManager.Instance.CurrentServerInfo.PlayerCount = NetworkServer.connections.Count;
-                NodeListServerCommunicationManager.Instance.AddUpdateServerEntry();
+                // Stops client host from double calling AddUpdateServerEntry
+                if (conn.connectionId != 0) { NodeListServerCommunicationManager.Instance.AddUpdateServerEntry(); }
             }
         }
 
@@ -177,7 +178,8 @@ namespace NodeListServer
             if (NodeListServerCommunicationManager.Instance != null)
             {
                 NodeListServerCommunicationManager.Instance.CurrentServerInfo.PlayerCount = NetworkServer.connections.Count;
-                NodeListServerCommunicationManager.Instance.AddUpdateServerEntry();
+                // Fix for client host
+                if (conn.connectionId != 0) { NodeListServerCommunicationManager.Instance.AddUpdateServerEntry(); }
             }
         }
 
