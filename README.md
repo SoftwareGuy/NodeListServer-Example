@@ -12,6 +12,10 @@ _**It is advised that this project is only used as a reference and not a "comple
 
 You are strongly advised NOT to use Furutaka's NodeLS instance in production as Oiran Studio cannot promise that it will be running forever. Instead, learn how to run your own instance by checking out the [NodeListServer repository](https://github.com/SoftwareGuy/NodeListServer). **Check your editor logs for any errors before you file a Issue Ticket.** There is a fair chance that the demo NodeListServer instance may be shut down for various reasons.
 
+## Setup
+1.  Open the List Example scene, click Logic gameobject, and change the masterServerUrl and communicationKey, the key and port you will have set in Node List Server.config file on your vps.  ( example masterServerUrl:  http://MyVPS:8008/list )
+2.	Open NodeListServerCommunicationManager, and set the two variables, Server and AuthKey, same as above.
+
 ## Server Mode
 
 1.  Open the project in your version of Unity. Remember to use a version supported with Mirror, which is 2018.3 - 2019.x. **Alpha/Beta versions are not supported.**
