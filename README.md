@@ -14,7 +14,7 @@ You are strongly advised NOT to use Furutaka's NodeLS instance in production as 
 
 ## Setup
 1.  Open the List Example scene, click Logic gameobject, and change the masterServerUrl and communicationKey, the key and port you will have set in Node List Server.config file on your vps.  ( example masterServerUrl:  http://MyVPS:8008/list )
-2.	Open NodeListServerCommunicationManager, and set the two variables, Server and AuthKey, same as above.
+2.	Locate and open the script called: NodeListServerCommunicationManager, and set the two variables, Server and AuthKey, same as above.
 
 ## Server Mode
 
