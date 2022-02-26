@@ -6,16 +6,18 @@ namespace NodeListServer
 {
 
     [Serializable]
-    public class NodeListServerListResponse
+    public class ServerListResponse
     {
         // Number of known servers.
         public int count;
         // The container for the known servers.
-        public List<NodeListServerListEntry> servers;
+        public List<ServerListEntry> servers;
+        // Ideally used for client-hosted games, tells you how often you should refresh your server information.
+        public int updateFrequency;
     }
 
     [Serializable]
-    public class NodeListServerListEntry
+    public class ServerListEntry
     {
         // IP address. Beware: Might be IPv6 format, and require you to chop off the leading "::ffff:" part. YMMV.
         public string ip;
@@ -35,9 +37,10 @@ namespace NodeListServer
     public struct ServerInfo
     {
         public string Name;         // The name of the server.
-        public int Port;             // The port of the server.
-        public int PlayerCount;     // The count of players currently on the server.
-        public int PlayerCapacity;  // The count of players allowed on the server.
+        // public string Ip;           // The IP of the server.
+        public int Port;            // The port of the server.
+        public int Count;           // The count of players currently on the server.
+        public int Capacity;        // The count of players allowed on the server.
         public string ExtraInformation; // Some extra information, probably best in JSON format for easy parsing.
     }
 }

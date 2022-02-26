@@ -44,3 +44,5 @@ sysinfo.txt
 
 # Crashlytics generated file
 Assets/Mirror/Tests/
+Assets/NodeListServer/DebugCommunicator.cs
+Assets/NodeListServer/DebugCommunicator.cs.meta

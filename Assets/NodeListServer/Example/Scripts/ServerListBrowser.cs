@@ -1,5 +1,4 @@
 ﻿// This file is part of the NodeListServer Example package.
-using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,11 +7,11 @@ using UnityEngine.UI;
 
 namespace NodeListServer
 {
-    public class ServerListClientLogic : MonoBehaviour
+    public class ServerListBrowser : MonoBehaviour
     {
         [Header("API Configuration")]
-        [Tooltip("The URL to connect to the NodeListServer. For example, http://127.0.0.1:8889/list.")]
-        [SerializeField] private string masterServerUrl = "http://127.0.0.1:8889/list";
+        [Tooltip("The URL to connect to the NodeListServer. For example, http://127.0.0.1:8889. Omit the last slash.")]
+        [SerializeField] private string serverEndpoint = "http://127.0.0.1:8889";
         [Tooltip("The key required to talk to the server. It must match. Default is NodeListServerDefaultKey.")]
         [SerializeField] private string communicationKey = "NodeListServerDefaultKey";
 
@@ -33,16 +32,13 @@ namespace NodeListServer
         public Button supportButton;
 
         // Stop editing from this point onwards //
-        private bool isBusy = false;
+        private bool isBusy => nlsCommunicator.Busy;
 
-        private WWWForm unityRequestForm;
-        private List<NodeListServerListEntry> listServerListEntries = new List<NodeListServerListEntry>();
+        private NLSCommunicator nlsCommunicator = new NLSCommunicator();
+        private List<ServerListEntry> listServerListEntries = new List<ServerListEntry>();
 
         private void Awake()
         {
-            unityRequestForm = new WWWForm();
-            unityRequestForm.AddField("serverKey", communicationKey);
-
             // Sanity Checks
             if (string.IsNullOrEmpty(communicationKey))
             {
@@ -51,21 +47,20 @@ namespace NodeListServer
                 return;
             }
 
+            nlsCommunicator.EndPoint = serverEndpoint;
+            nlsCommunicator.OnServerListRetrieved += OnServerListRetrieved;
+
             if (mainStatusText != null)
             {
                 mainStatusText.text = "Initializing";
             }
 
             if (refreshButton)
-            {
-                refreshButton.onClick.AddListener(() => Invoke(nameof(RefreshServerList), 0f));
-            }
+                refreshButton.onClick.AddListener(RefreshList);
 
             // For experts only
             if (supportButton)
-            {
                 supportButton.onClick.AddListener(SupportButton);
-            }
         }
 
         private void Start()
@@ -89,61 +84,6 @@ namespace NodeListServer
             }
         }
 
-        // -- Coroutines -- //
-        private IEnumerator RefreshServerList()
-        {
-            if (popupStatusText != null) popupStatusText.text = "Just wait a moment";
-            print("Refreshing the server list...");
-
-            // DEBUG: Investigating some Unity jank, seems that Unity can get "stuck"
-            // on a value and treat it like it's precious
-            // print(masterServerUrl);
-
-            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequest.Post(masterServerUrl, unityRequestForm))
-            {
-                isBusy = true;
-                print("Working...");
-
-                // This will wait until the request is sent.
-                yield return www.SendWebRequest();
-
-                if (www.responseCode == 200)
-                {
-                    // Got a response that's not an error, woohoo!
-                    NodeListServerListResponse response = JsonUtility.FromJson<NodeListServerListResponse>(www.downloadHandler.text.Trim());
-
-                    if (response != null)
-                    {
-                        print("Successful refresh!");
-                        print($"Received a response with {response.count} servers.");
-
-                        if (mainStatusText != null) mainStatusText.text = $"{response.count} servers online.";
-
-                        listServerListEntries = response.servers;
-
-                        if (ListElementContainer != null)
-                        {
-                            BalancePrefabs(listServerListEntries.Count, ListElementContainer.transform);
-                            UpdateListElements();
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError($"Failed to refresh the server list! The response couldn't be parsed.");
-                    }
-
-                }
-                else
-                {
-                    Debug.LogError($"Failed to refresh the server list! The error returned was: {www.responseCode}\n{www.error}");
-                }
-
-                isBusy = false;
-            }
-
-            yield break;
-        }
-
         // Apparently invoke repeating doesn't work for IEnumerators
         // So I guess the workaround is to make a bootstrapper.
         private void RefreshList()
@@ -151,7 +91,7 @@ namespace NodeListServer
             // Don't refresh again if we're busy
             if (isBusy) return;
 
-            StartCoroutine(RefreshServerList());
+            nlsCommunicator.RetrieveServerList(communicationKey);
         }
 
         // -- UI Elements -- //
@@ -176,7 +116,12 @@ namespace NodeListServer
         {
             for (int i = 0; i < listServerListEntries.Count; i++)
             {
-                if (i >= ListElementContainer.transform.childCount || ListElementContainer.transform.GetChild(i) == null) continue;
+                if (i >= ListElementContainer.transform.childCount || ListElementContainer.transform.GetChild(i) == null)
+                {
+                    print("That's null");
+                    continue;
+                }
+
                 ListEntryController entryController = ListElementContainer.transform.GetChild(i).GetComponent<ListEntryController>();
 
                 string modifiedAddress = string.Empty;
@@ -194,15 +139,6 @@ namespace NodeListServer
                 entryController.playersText.text = $"{listServerListEntries[i].players} {(listServerListEntries[i].capacity > 0 ? $"/ {listServerListEntries[i].capacity}" : string.Empty)}";
                 // It is up to you to figure out how to do the latency text.
                 entryController.latencyText.text = "-";
-
-                entryController.joinButton.onClick.RemoveAllListeners();
-                entryController.joinButton.onClick.AddListener(() =>
-                {
-                    // Debug: Prints CLICKY to see if the button actually was clicked or Unity UI was being dumb
-                    // print("CLICKY");
-                    NetworkManager.singleton.networkAddress = modifiedAddress;
-                    NetworkManager.singleton.StartClient();
-                });
             }
 
             // Done here.
@@ -213,6 +149,18 @@ namespace NodeListServer
             Application.OpenURL("http://github.com/SoftwareGuy/NodeListServer-Example");
         }
 
+        #region Callbacks for events from NLS Communicator
+        private void OnServerListRetrieved(ServerListResponse response)
+        {
+            listServerListEntries = response.servers;
+            print(listServerListEntries.Count);
 
+            if (ListElementContainer != null)
+            {
+                BalancePrefabs(listServerListEntries.Count, ListElementContainer.transform);
+                UpdateListElements();
+            }
+        }
+        #endregion
     }
 }

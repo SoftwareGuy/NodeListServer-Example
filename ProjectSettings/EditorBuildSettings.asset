@@ -8,7 +8,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/NodeListServer/Example/List Example.unity
     guid: ccdea83d270df4b078963a0243e41ac0
-  - enabled: 1
-    path: Assets/NodeListServer/Example/OnlineScene-Basic-NLS.unity
-    guid: 9871cb4de390ca740aa3003c96ec92b3
   m_configObjects: {}
