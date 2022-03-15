@@ -124,7 +124,7 @@ namespace NodeListServer
 
                 ListEntryController entryController = ListElementContainer.transform.GetChild(i).GetComponent<ListEntryController>();
 
-                string modifiedAddress = string.Empty;
+                string modifiedAddress;
                 if (listServerListEntries[i].ip.StartsWith("::ffff:"))
                 {
                     modifiedAddress = listServerListEntries[i].ip.Replace("::ffff:", string.Empty);

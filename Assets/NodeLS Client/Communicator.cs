@@ -35,9 +35,6 @@ namespace NodeListServer
         /// </summary>
         private Uri EndPointAsUri { get { return new Uri(EndPoint); } }
 
-        private HttpClient httpClient = new HttpClient();
-        private List<KeyValuePair<string, string>> postDataPairs = new List<KeyValuePair<string, string>>();
-
         public Action<ServerListResponse> OnServerListRetrieved;
         public Action<string> OnServerRegistered;
         public Action OnServerRemoved;
@@ -70,7 +67,6 @@ namespace NodeListServer
 
                 yield return requestRunner.SendWebRequest();
 
-                Busy = false;
                 if (requestRunner.result == UnityWebRequest.Result.Success)
                 {
                     // Invoke the data received event.
@@ -79,62 +75,11 @@ namespace NodeListServer
                 else
                 {
                     Debug.LogError($"NodeLS Client: Error processing request. Status returned was {requestRunner.result}.");
-                    yield break;
                 }
             }
 
-            yield break;
-        }
-
-        [Obsolete("Use RetrieveList instead, this was made on a whim.")]
-        /// <summary>
-        /// Retrieves the list of servers currently registered with the NodeLS Endpoint.
-        /// </summary>
-        /// <param name="CommunicationKey">The communication key used to authenicate.</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void RetrieveServerList(string CommunicationKey)
-        {
-            // Did the user forget to set the endpoint?
-            if (string.IsNullOrWhiteSpace(EndPoint))
-                throw new ArgumentNullException(EndPoint);
-
-            // Did the user forget to specify the communication key?
-            if (string.IsNullOrWhiteSpace(CommunicationKey))
-                throw new ArgumentNullException(CommunicationKey);
-
-            // Sanity checks passed, let's attempt communication.
-            httpClient.BaseAddress = EndPointAsUri;
-
-            // Create 
-            postDataPairs.Clear();
-            postDataPairs.Add(new KeyValuePair<string, string>("serverKey", CommunicationKey.Trim()));
-
-            var postContent = new FormUrlEncodedContent(postDataPairs);
-            HttpResponseMessage theResult = null;
-
-            try
-            {
-                theResult = httpClient.PostAsync(QueryEndpoint, postContent).Result;
-            }
-            catch
-            {
-                // Swallow it
-            }
-
-            // Was this successful?
-            if (theResult != null && theResult.IsSuccessStatusCode)
-            {
-                var contentAsString = theResult.Content.ReadAsStringAsync().Result.Trim();
-                UnityEngine.Debug.Log(contentAsString);
-                OnServerListRetrieved?.Invoke(JsonUtility.FromJson<ServerListResponse>(contentAsString));
-                Busy = false;
-            }
-            else
-            {
-                // Throw an exception.
-                Busy = false;
-                throw new Exception($"Failed retrieving Server List.");
-            }
+            Busy = false;
+            yield return null;
         }
 
         /// <summary>
@@ -143,107 +88,74 @@ namespace NodeListServer
         /// <param name="CommunicationKey">The communication key used to authenicate.</param>
         /// <returns>A string containing a GUID (UUID) identifying the server on the NodeLS instance.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public string RegisterServer(string CommunicationKey, ServerInfo newServerInfo)
+        public IEnumerator RegisterServer(string commKey, ServerInfo newServerInfo)
         {
-            // Did the user forget to set the endpoint?
-            if (string.IsNullOrWhiteSpace(EndPoint))
-                throw new ArgumentNullException(EndPoint);
+            // Sanity checks: Did the user forget to set the endpoint? Did the user forget to
+            // specify the communication key?
 
-            // Did the user forget to specify the communication key?
-            if (string.IsNullOrWhiteSpace(CommunicationKey))
-                throw new ArgumentNullException(CommunicationKey);
+            if (string.IsNullOrWhiteSpace(EndPoint) || string.IsNullOrWhiteSpace(commKey))
+            {
+                Debug.LogError("NodeLS Client: Endpoint or Communicaton key is invalid.");
+                yield break;
+            }
+
+            Busy = true;
 
             // TODO: Server information checks
+            WWWForm postRequest = new WWWForm();
+            postRequest.AddField("serverKey", commKey.Trim());
+            postRequest.AddField("serverName", newServerInfo.Name.Trim());
+            // Possibly in the future, doesn't do anything atm.
+            // ostRequest.AddField("serverIp", newServerInfo.Ip);
+            postRequest.AddField("serverPort", newServerInfo.Port);
+            postRequest.AddField("serverPlayers", newServerInfo.Count);
+            postRequest.AddField("serverCapacity", newServerInfo.Capacity);
+            postRequest.AddField("serverExtras", newServerInfo.ExtraInformation == null ? string.Empty : newServerInfo.ExtraInformation.ToString());
 
-            // Sanity checks passed, let's attempt communication.
-            httpClient.BaseAddress = EndPointAsUri;
-
-            postDataPairs.Clear();
-            postDataPairs.Add(new KeyValuePair<string, string>("serverKey", CommunicationKey.Trim()));
-            postDataPairs.Add(new KeyValuePair<string, string>("serverName", newServerInfo.Name));
-            // Possibly in the future. Does nothing atm.
-            // postDataPairs.Add("serverIp", newServerInfo.Ip);
-            postDataPairs.Add(new KeyValuePair<string, string>("serverPort", newServerInfo.Port.ToString()));
-            postDataPairs.Add(new KeyValuePair<string, string>("serverPlayers", newServerInfo.Count.ToString()));
-            postDataPairs.Add(new KeyValuePair<string, string>("serverCapacity", newServerInfo.Capacity.ToString()));
-            postDataPairs.Add(new KeyValuePair<string, string>("serverExtras", newServerInfo.ExtraInformation == null ? string.Empty : newServerInfo.ExtraInformation.ToString()));
-
-            var postContent = new FormUrlEncodedContent(postDataPairs);
-            HttpResponseMessage theResult = null;
-            try
+            using (UnityWebRequest requestRunner = UnityWebRequest.Post($"{EndPoint}{RegisterEndpoint}", postRequest))
             {
-                theResult = httpClient.PostAsync(RegisterEndpoint, postContent).Result;
-            }
-            catch
-            {
-                // Swallow it
+                yield return requestRunner.SendWebRequest();
+
+                if (requestRunner.result == UnityWebRequest.Result.Success)
+                {
+                    // It works!
+                    OnServerRegistered?.Invoke(requestRunner.downloadHandler.text.Trim());
+                }
+                else
+                {
+                    Debug.LogError($"NodeLS Client: Error processing register request. Status returned was {requestRunner.result}.");
+                }
             }
 
-
-            // Was this successful?
-            if (theResult != null && theResult.IsSuccessStatusCode)
-            {
-                var contentAsString = theResult.Content.ReadAsStringAsync().Result.Trim();
-                OnServerRegistered?.Invoke(contentAsString);
-                return contentAsString;
-            }
-            else
-            {
-                // Throw an exception.
-                throw new Exception($"Failed registering server. More information available on the NodeLS instance console.");
-            }
+            Busy = false;
+            yield return null;
         }
 
-        public void DeregisterServer(string CommunicationKey, string ServerUuid)
+        public IEnumerator DeregisterServer(string commKey, string serverUuid)
         {
-            // Did the user forget to set the endpoint?
-            if (string.IsNullOrWhiteSpace(EndPoint))
-                throw new ArgumentNullException(EndPoint);
-
-            // Did the user forget to specify the communication key?
-            if (string.IsNullOrWhiteSpace(CommunicationKey))
-                throw new ArgumentNullException(CommunicationKey);
-
-            // Gotta have a server uuid to use this!
-            if (string.IsNullOrWhiteSpace(ServerUuid))
-                throw new ArgumentNullException(ServerUuid);
-
-            // Sanity check passed, attempt contact.
-            httpClient.BaseAddress = EndPointAsUri;
-
-            List<KeyValuePair<string, string>> postDataPairs = new List<KeyValuePair<string, string>>
+            if (string.IsNullOrWhiteSpace(EndPoint) || string.IsNullOrWhiteSpace(commKey) || string.IsNullOrWhiteSpace(serverUuid))
             {
-                // Server Auth Key
-                new KeyValuePair<string, string>("serverKey", CommunicationKey.Trim()),
-                // Server UUID to remove
-                new KeyValuePair<string, string>("serverUuid", ServerUuid.Trim())
-            };
-
-            var postContent = new FormUrlEncodedContent(postDataPairs);
-            HttpResponseMessage theResult = null;
-            try
-            {
-                theResult = httpClient.PostAsync(RemoveEndpoint, postContent).Result;
-            }
-            catch
-            {
-                // Swallow it
+                Debug.LogError("NodeLS Client: Endpoint, communicaton key or server UUID is invalid.");
+                yield break;
             }
 
-            // Was this successful?
-            if (theResult != null && theResult.IsSuccessStatusCode)
-            {
-                // Fire it off.
-                OnServerRemoved?.Invoke();
-            }
-            else
-            {
-                // Fire it off anyway.
-                OnServerRemoved?.Invoke();
+            WWWForm postRequest = new WWWForm();
+            postRequest.AddField("serverKey", commKey.Trim());
+            postRequest.AddField("serverUuid", serverUuid.Trim());
 
-                // Throw an exception.
-                throw new Exception($"Failed deregistering server. This servers' listing may have expired or the NodeLS server was restarted. " +
-                    $"HTTP status code {theResult.StatusCode}.");
+            using (UnityWebRequest requestRunner = UnityWebRequest.Post($"{EndPoint}{RemoveEndpoint}", postRequest))
+            {
+                yield return requestRunner.SendWebRequest();
+
+                if (requestRunner.result == UnityWebRequest.Result.Success)
+                {
+                    // It works!
+                    OnServerRemoved.Invoke();
+                }
+                else
+                {
+                    Debug.LogError($"NodeLS Client: Error processing deregister request. Status returned was {requestRunner.result}.");
+                }
             }
         }
 
