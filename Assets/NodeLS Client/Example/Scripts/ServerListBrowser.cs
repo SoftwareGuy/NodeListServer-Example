@@ -32,7 +32,7 @@ namespace NodeListServer
         public Button supportButton;
 
         // Stop editing from this point onwards //
-        private bool isBusy => nlsCommunicator.Busy;
+        private bool IsBusy => nlsCommunicator.Busy;
 
         private NLSCommunicator nlsCommunicator = new NLSCommunicator();
         private List<ServerListEntry> listServerListEntries = new List<ServerListEntry>();
@@ -80,7 +80,7 @@ namespace NodeListServer
         {
             if (popup != null)
             {
-                popup.SetActive(isBusy);
+                popup.SetActive(IsBusy);
             }
         }
 
@@ -89,7 +89,7 @@ namespace NodeListServer
         private void RefreshList()
         {
             // Don't refresh again if we're busy.
-            if (isBusy) return;
+            if (IsBusy) return;
 
             StartCoroutine(nlsCommunicator.RetrieveList(communicationKey));
         }
