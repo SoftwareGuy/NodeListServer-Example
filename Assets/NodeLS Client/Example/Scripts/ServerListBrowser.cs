@@ -91,7 +91,7 @@ namespace NodeListServer
             // Don't refresh again if we're busy
             if (isBusy) return;
 
-            nlsCommunicator.RetrieveServerList(communicationKey);
+            StartCoroutine(nlsCommunicator.RetrieveList(communicationKey));
         }
 
         // -- UI Elements -- //
@@ -153,7 +153,9 @@ namespace NodeListServer
         private void OnServerListRetrieved(ServerListResponse response)
         {
             listServerListEntries = response.servers;
-            print(listServerListEntries.Count);
+            
+            // For debug purposes only.
+            // print(listServerListEntries.Count);
 
             if (ListElementContainer != null)
             {

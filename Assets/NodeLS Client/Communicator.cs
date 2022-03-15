@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -27,6 +28,7 @@ namespace NodeListServer
         #endregion
 
         public bool Busy { get; private set; }
+
         #region Private properties
         /// <summary>
         /// Convience property. No need to worry about this.
@@ -43,6 +45,48 @@ namespace NodeListServer
         #endregion
 
         #region Communication Routines
+        /// <summary>
+        /// <para>Retrieves the list of servers currently registered with the NodeLS Endpoint.</para>
+        /// <para>If something goes wrong, a Debug.LogError call is made.</para>
+        /// </summary>
+        /// <param name="CommunicationKey">The communication key used to authenicate.</param>
+        public IEnumerator RetrieveList(string commKey)
+        {
+            // Sanity checks: Did the user forget to set the endpoint? Did the user forget to
+            // specify the communication key?
+
+            if (string.IsNullOrWhiteSpace(EndPoint) || string.IsNullOrWhiteSpace(commKey))
+            {
+                Debug.LogError("NodeLS Client: Endpoint or Communicaton key is invalid.");
+                yield break;
+            }
+
+            WWWForm postRequest = new WWWForm();
+            postRequest.AddField("serverKey", commKey.Trim());
+
+            using (UnityWebRequest requestRunner = UnityWebRequest.Post($"{EndPoint}{QueryEndpoint}", postRequest))
+            {
+                Busy = true;
+
+                yield return requestRunner.SendWebRequest();
+
+                Busy = false;
+                if (requestRunner.result == UnityWebRequest.Result.Success)
+                {
+                    // Invoke the data received event.
+                    OnServerListRetrieved?.Invoke(JsonUtility.FromJson<ServerListResponse>(requestRunner.downloadHandler.text.Trim()));
+                }
+                else
+                {
+                    Debug.LogError($"NodeLS Client: Error processing request. Status returned was {requestRunner.result}.");
+                    yield break;
+                }
+            }
+
+            yield break;
+        }
+
+        [Obsolete("Use RetrieveList instead, this was made on a whim.")]
         /// <summary>
         /// Retrieves the list of servers currently registered with the NodeLS Endpoint.
         /// </summary>
@@ -185,7 +229,7 @@ namespace NodeListServer
             {
                 // Swallow it
             }
-            
+
             // Was this successful?
             if (theResult != null && theResult.IsSuccessStatusCode)
             {
