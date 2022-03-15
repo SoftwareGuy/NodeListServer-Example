@@ -88,7 +88,7 @@ namespace NodeListServer
         // So I guess the workaround is to make a bootstrapper.
         private void RefreshList()
         {
-            // Don't refresh again if we're busy
+            // Don't refresh again if we're busy.
             if (isBusy) return;
 
             StartCoroutine(nlsCommunicator.RetrieveList(communicationKey));
