@@ -4,6 +4,12 @@ using UnityEngine;
 
 namespace NodeListServer
 {
+#if UNITY_EDITOR
+    /// <summary>
+    /// This is for debug purposes only.
+    /// NOT RECOMMENDED FOR USE IN A PRODUCTION ENVIRONMENT.
+    /// YOU HAVE BEEN WARNED.
+    /// </summary>
     public class DebugCommunicator : MonoBehaviour
     {
         private NLSCommunicator communicator = new NLSCommunicator();
@@ -13,6 +19,7 @@ namespace NodeListServer
         private void Start()
         {
             communicator.EndPoint = "http://192.168.88.250:8889";
+            communicator.OnServerRegistered += OnServerRegistered;
             communicator.OnServerRemoved += OnServerRemoved;
         }
 
@@ -32,17 +39,14 @@ namespace NodeListServer
 
                 ServerInfo serverInfo = new ServerInfo()
                 {
-                    Name = "NodeLS Communicator Test Server",
-                    Count = 69,
-                    Capacity = 420,
+                    Name = $"NodeLS Dummy Server {Random.Range(100, 1000)}",
+                    Count = Random.Range(0, 69),
+                    Capacity = 999,
                     Port = 31337,
                     ExtraInformation = string.Empty,
                 };
 
                 StartCoroutine(communicator.RegisterServer("NodeListServerDefaultKey", serverInfo));
-
-                // ourServerIdentifier = 
-
             }
             else if (Input.GetKeyDown(KeyCode.E))
             {
@@ -50,14 +54,21 @@ namespace NodeListServer
                 if (string.IsNullOrEmpty(ourServerIdentifier))
                     return;
 
-                communicator.DeregisterServer("NodeListServerDefaultKey", ourServerIdentifier);
+                StartCoroutine(communicator.DeregisterServer("NodeListServerDefaultKey", ourServerIdentifier));
             }
+        }
+
+        private void OnServerRegistered(string serverUuid)
+        {
+            print("Server registered successfully");
+            ourServerIdentifier = serverUuid;
         }
 
         private void OnServerRemoved()
         {
+            print("Server removed successfully");
             ourServerIdentifier = string.Empty;
         }
     }
-
+#endif
 }
