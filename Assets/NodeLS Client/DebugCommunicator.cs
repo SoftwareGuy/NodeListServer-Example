@@ -39,7 +39,9 @@ namespace NodeListServer
                     ExtraInformation = string.Empty,
                 };
 
-                ourServerIdentifier = communicator.RegisterServer("NodeListServerDefaultKey", serverInfo);
+                StartCoroutine(communicator.RegisterServer("NodeListServerDefaultKey", serverInfo));
+
+                // ourServerIdentifier = 
 
             }
             else if (Input.GetKeyDown(KeyCode.E))
