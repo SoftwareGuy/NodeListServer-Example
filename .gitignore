@@ -46,3 +46,7 @@ sysinfo.txt
 Assets/Mirror/Tests/
 Assets/NodeListServer/DebugCommunicator.cs
 Assets/NodeListServer/DebugCommunicator.cs.meta
+Assets/Mirror
+Assets/Mirror.meta
+Assets/ScriptTemplates
+Assets/ScriptTemplates.meta
