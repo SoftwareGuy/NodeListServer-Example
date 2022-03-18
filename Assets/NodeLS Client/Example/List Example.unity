@@ -1526,17 +1526,12 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'Git the source at https://github.com/SoftwareGuy/NodeListServer
-
-    Thanks
-    for using Aussie Open Source Software!
-
-
-    Modify the NLS Adapter settings
-    on the "NodeListServer NetMan" in this scene, then build as a Server Build in
-    Unity via File > Build Settings > Tick Server Build > Build & Run. Server Builds
-    will automatically boot and register themselves using this example unless you
-    broke it. No refunds.'
+  m_Text: "If you like this software, please consider donating coffee at https://ko-fi.com/coburn\nThanks
+    for using Aussie Open Source Software. Don't forget to read the fine manual!\n\nThis
+    scene only shows the server browser in action, it doesn't contain any server
+    functionality. Clicking join will do nothing but print a message to the console.
+    \n\nPlease refer to the network stack integrations int the Git Repository for
+    information on how to integrate NodeLS in your server instances."
 --- !u!222 &777480157
 CanvasRenderer:
   m_ObjectHideFlags: 0

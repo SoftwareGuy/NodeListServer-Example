@@ -32,6 +32,8 @@ namespace NodeListServer
         public Button supportButton;
 
         // Stop editing from this point onwards //
+        public Action<string, int> OnJoinButtonClicked;
+
         private bool IsBusy => nlsCommunicator.Busy;
 
         private NLSCommunicator nlsCommunicator = new NLSCommunicator();
@@ -125,6 +127,8 @@ namespace NodeListServer
                 ListEntryController entryController = ListElementContainer.transform.GetChild(i).GetComponent<ListEntryController>();
 
                 string modifiedAddress;
+                int port;
+
                 if (listServerListEntries[i].ip.StartsWith("::ffff:"))
                 {
                     modifiedAddress = listServerListEntries[i].ip.Replace("::ffff:", string.Empty);
@@ -134,11 +138,21 @@ namespace NodeListServer
                     modifiedAddress = listServerListEntries[i].ip;
                 }
 
+                port = listServerListEntries[i].port;
                 entryController.titleText.text = listServerListEntries[i].name;
                 entryController.addressText.text = modifiedAddress;
                 entryController.playersText.text = $"{listServerListEntries[i].players} {(listServerListEntries[i].capacity > 0 ? $"/ {listServerListEntries[i].capacity}" : string.Empty)}";
                 // It is up to you to figure out how to do the latency text.
                 entryController.latencyText.text = "-";
+
+                if(entryController.joinButton != null)
+                {
+                    // Remove any existing listening callbacks.
+                    entryController.joinButton.onClick.RemoveAllListeners();
+                    
+                    // Add a new listener.
+                    entryController.joinButton.onClick.AddListener(() => OnJoinButtonClick(modifiedAddress, port));
+                }
             }
 
             // Done here.
@@ -164,5 +178,12 @@ namespace NodeListServer
             }
         }
         #endregion
+
+        private void OnJoinButtonClick(string ip, int port)
+        {
+            print($"You clicked join on a server and we'd probably be connecting to a server at {ip} on port {port}.");
+
+            OnJoinButtonClicked?.Invoke(ip, port);
+        }
     }
 }

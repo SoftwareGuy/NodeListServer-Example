@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/NodeListServer/Example/List Example.unity
+    path: Assets/NodeLS Client/Example/List Example.unity
     guid: ccdea83d270df4b078963a0243e41ac0
   m_configObjects: {}
